@@ -1,0 +1,33 @@
+name: released
+on:
+  release:
+    types: [created]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      ALPINELINUX_IMG: alpine:latest
+      VOIDLINUX_IMG: voidlinux/voidlinux-musl:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: prepare
+        run: |
+          if [ -f VERSION ] ; then
+            VERSION=$(cat VERSION)
+            PKG=$(basename "$GITHUB_REPOSITORY")
+            tar -zcvf $PKG-$VERSION.tar.gz --exclude-backups --exclude-vcs .
+          fi
+      - name: upload artifacts
+        run: |
+          if [ -f VERSION ] ; then
+            VERSION=$(cat VERSION)
+            PKG=$(basename "$GITHUB_REPOSITORY")
+            if [ -f $PKG-$VERSION.tar.gz ] ; then
+              gh release upload --clobber $GITHUB_REF_NAME $PKG-$VERSION.tar.gz
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
