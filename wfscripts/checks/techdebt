@@ -1,0 +1,6 @@
+#!/bin/sh
+rc=0
+find snippets -type f ! -name '*.pyc' \
+	| grep -v /.venv/ \
+	| xargs grep [tT]ODO:  \
+	| sed -e 's!:.*\([tT]ODO\):!: \1:!'
