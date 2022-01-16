@@ -8,10 +8,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - uses: actions/checkout@v2
-        with:
-          repository: TortugaLabs/ashlib
-          path: .ashlib
+      #~ - uses: actions/checkout@v2
+        #~ with:
+          #~ repository: TortugaLabs/ashlib
+          #~ path: .ashlib
       - name: static checks
         run: |
           echo ${{ github.event_name }}
