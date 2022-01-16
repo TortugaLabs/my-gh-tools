@@ -42,7 +42,7 @@ objpath=$(basename "$subdir")
 subdir=$(dirname "$subdir")
 while [ x"$subdir" != x"/" ]
 do
-  [ -f "$subdir"/.git ] && break
+  [ -e "$subdir"/.git ] && break
   objpath="$(basename "$subdir")/$objpath"
   subdir=$(dirname "$subdir")
 done
