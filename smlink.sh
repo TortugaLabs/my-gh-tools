@@ -42,7 +42,7 @@ objpath=$(basename "$subdir")
 subdir=$(dirname "$subdir")
 while [ x"$subdir" != x"/" ]
 do
-  [ -f "$subdir"/.git ] && break
+  [ -e "$subdir"/.git ] && break
   objpath="$(basename "$subdir")/$objpath"
   subdir=$(dirname "$subdir")
 done
@@ -53,6 +53,37 @@ fi
 
 md5num=$(md5sum "$link_hdr"|cut -f1 -d' ')
 submodule=$(basename "$subdir")
+
+#
+# Find gitdir
+#
+# determine .git directory
+gitdir=$(readlink -f ".")
+while [ x"$gitdir" != x"/" ]
+do
+  [ -d "$gitdir"/.git ] && break
+  gitdir=$(dirname "$gitdir")
+done
+if [ x"$gitdir" = x"/" ] ; then
+  echo "Unable to find gitdir"
+  exit 1
+fi
+
+#
+# Make sure the subpath exists
+#
+subpath=$(grep '[ \t]*path[ \t]*=[ \t]*' "$gitdir/.gitmodules" \
+	| sed -e 's!^[ \t]*path[ \t]*=[ \t]!!' \
+	| grep -E '(^'"$submodule"'$|/'"$submodule"')')
+if [ -z "$subpath" ] ; then
+  echo "$SUBMODULE: Missing submodule path!" 1>&2
+  exit 3
+fi
+if [ ! -f "$subpath/$objpath" ] ; then
+  echo "$objpath: not found in $subpath" 1>&2
+  exit 4
+fi
+
 
 
 sed \
@@ -70,27 +101,4 @@ echo "md5num=$md5num"
 echo "submodule=$submodule"
 echo "link_name=$link_name"
 echo "target=$target"
-
 exit
-
-
-if [ -x "$gitdir/../$SUBMODULE/$OBJPATH" ] ; then
-  exec "$gitdir/../$SUBMODULE/$OBJPATH" "$@"
-fi
-
-if [ ! -f "$gitdir/.gitmodules" ] ; then
-  echo "$0: not installed properly" 1>&2
-  exit 2
-fi
-
-
-
-MD5SUM='<MD5SUM>'
-SUBMODULE='<SUBMODULE>'
-OBJPATH='<OBJPATH>'
-
-
-echo target=$target
-echo link_name=$link_name
-echo O0=$O0
-
