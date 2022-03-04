@@ -52,7 +52,11 @@ if $github ; then
 fi
 
 relid="$1" ; shift
-repodir="$(dirname "$(readlink -f "$0")")"
+if [ -n "${ORIG0:-}" ] ; then
+  repodir="$(dirname "$(readlink -f "$ORIG0")")"
+else
+  repodir="$(dirname "$(readlink -f "$0")")"
+fi
 cd "$repodir"
 
 git pull --tags # Make sure remote|local tags are in sync
